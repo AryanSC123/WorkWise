@@ -1,16 +1,48 @@
 import { useState } from "react";
 import MuiButton from "../../MuiTemplates/MuiButton";
-import JoinTeam from "./JoinTeam";
-import CreateTeam from "./CreateTeam";
 import { MuiInput } from "../../MuiTemplates/MuiInput";
 import { IconButton } from "@mui/material";
 import GroupAddIcon from "@mui/icons-material/GroupAdd"; // Icon for Create Team
 import GroupIcon from "@mui/icons-material/Group"; // Icon for Join Team
+import { createTeam, joinTeam } from "../../Firebase/firebaseFunctions"; // Import joinTeam
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 export default function JoinOrCreateTeam() {
-  const [joinTeamBool, setJoinTeamBool] = useState(false);
-  const [teamCode, setTeamCode] = useState("");
   const [teamName, setTeamName] = useState("");
+  const [teamCode, setTeamCode] = useState("");
+  const [error, setError] = useState("");
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user); // Get user object from Redux state
+  const userId = user ? user.uid : null; // Safely access uid
+  const navigate = useNavigate();
+
+  const handleCreateTeam = async () => {
+    try {
+      const teamId = await createTeam(teamName, userId); // Pass userId to createTeam
+      console.log("Team created with ID:", teamId);
+      // Optionally handle further actions after team creation
+      setTeamName(""); // Clear the input field
+    } catch (error) {
+      setError(error.message); // Set error message for display
+      console.error(error.message);
+    }
+  };
+
+  // const handleJoinTeam = async () => {
+  //   try {
+  //     await joinTeam(teamCode, userId); // Call joinTeam with teamCode and userId
+  //     console.log(`Successfully joined team with ID: ${teamCode}`);
+  //     setTeamCode(""); // Clear the input field
+  //   } catch (error) {
+  //     setError(error.message); // Set error message for display
+  //     console.error(error.message);
+  //   }
+  // };
+
+  const handleJoinTeam = (teamId) => {
+    navigate(`/videoCall/${teamId}`, { state: { userId: userId } });
+  };
 
   return (
     <div>
@@ -30,7 +62,7 @@ export default function JoinOrCreateTeam() {
             borderRadius: "5px",
             textAlign: "center",
             flex: 1,
-            maxWidth: "20%", // Limit width to 40% of the screen
+            maxWidth: "20%",
           }}
         >
           <IconButton
@@ -38,6 +70,8 @@ export default function JoinOrCreateTeam() {
           >
             <GroupAddIcon />
           </IconButton>
+          {error && <p style={{ color: "red" }}>{error}</p>}{" "}
+          {/* Display error message */}
           <MuiInput
             placeholder="Enter Team Name"
             value={teamName}
@@ -50,7 +84,7 @@ export default function JoinOrCreateTeam() {
           />
           <MuiButton
             label="Create Team"
-            onClick={() => setJoinTeamBool(false)}
+            onClick={handleCreateTeam} // Call handleCreateTeam
           />
         </div>
 
@@ -62,7 +96,7 @@ export default function JoinOrCreateTeam() {
             borderRadius: "5px",
             textAlign: "center",
             flex: 1,
-            maxWidth: "20%", // Limit width to 40% of the screen
+            maxWidth: "20%",
           }}
         >
           <IconButton
@@ -71,7 +105,7 @@ export default function JoinOrCreateTeam() {
             <GroupIcon />
           </IconButton>
           <MuiInput
-            placeholder="Enter Team Code"
+            placeholder="Enter Team UID"
             value={teamCode}
             onChange={(e) => setTeamCode(e.target.value)}
             variant="outlined"
@@ -80,18 +114,17 @@ export default function JoinOrCreateTeam() {
               marginBottom: "10px",
             }}
           />
+          {/* <MuiButton
+            label="Join Team"
+            onClick={handleJoinTeam} // Call handleJoinTeam
+          /> */}
+          {/* <MuiButton label="Join Team" onClick={() => handleJoinTeam(teamId)} /> */}
           <MuiButton
             label="Join Team"
-            onClick={() => {
-              // Handle join team logic here, e.g., validate teamCode
-              console.log(`Joining team with code: ${teamCode}`);
-              setJoinTeamBool(true);
-            }}
+            onClick={() => handleJoinTeam("NvevuoYQPcQXVelpPVqv")}
           />
         </div>
       </div>
-
-      {/* {joinTeamBool ? <JoinTeam /> : <CreateTeam />} */}
     </div>
   );
 }

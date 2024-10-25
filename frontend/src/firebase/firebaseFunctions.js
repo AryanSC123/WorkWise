@@ -7,6 +7,18 @@ import { auth } from "./firebase";
 import { login, logout } from "../Redux/action/authAction";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
+import { db } from "./firebase"; // Ensure you import your Firestore instance
+import {
+  collection,
+  addDoc,
+  doc,
+  getDoc,
+  updateDoc,
+  arrayUnion,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 
 export const signUpUser = async (email, password, dispatch) => {
   try {
@@ -16,8 +28,13 @@ export const signUpUser = async (email, password, dispatch) => {
       password
     );
 
-    // Dispatch the login action with user info
-    dispatch(login({ email: userCredential.user.email }));
+    // Dispatch the login action with user info including UID
+    dispatch(
+      login({
+        email: userCredential.user.email,
+        uid: userCredential.user.uid, // Store the UID
+      })
+    );
 
     return userCredential; // Return user credential on success
   } catch (error) {
@@ -33,14 +50,83 @@ export const useAuthListener = () => {
       if (user) {
         // User is signed in
         console.log(user);
-        dispatch(login({ email: user.email })); // Dispatch login action with user data
+        dispatch(login({ email: user.email, uid: user.uid })); // Dispatch login action with email and UID
       } else {
         // User is signed out
-        dispatch(logout()); // Dispatch logout action
+        dispatch(logout());
       }
     });
 
-    // Clean up the subscription on unmount
     return () => unsubscribe();
   }, [dispatch]);
+};
+
+export const createTeam = async (teamName, userId) => {
+  console.log(userId);
+  try {
+    const docRef = await addDoc(collection(db, "Teams"), {
+      name: teamName,
+      createdAt: new Date(),
+      admin: userId, // Add userId as the admin field
+    });
+    return docRef.id; // Return the ID of the created document
+  } catch (error) {
+    throw new Error("Error creating team: " + error.message);
+  }
+};
+
+export const joinTeam = async (teamId, userId) => {
+  try {
+    const teamDoc = doc(db, "Teams", teamId);
+    const teamSnapshot = await getDoc(teamDoc);
+
+    if (teamSnapshot.exists()) {
+      // Update the team document to include the new member's UID
+      await updateDoc(teamDoc, {
+        members: arrayUnion(userId), // Add the new member's UID to the members array
+      });
+      return true; // Return true if successfully joined
+    } else {
+      throw new Error("Team not found.");
+    }
+  } catch (error) {
+    throw new Error("Error joining team: " + error.message);
+  }
+};
+
+export const fetchUserTeams = async (userId) => {
+  try {
+    // Query for teams where the user is a member
+    const memberQuery = query(
+      collection(db, "Teams"),
+      where("members", "array-contains", userId)
+    );
+
+    // Query for teams where the user is an admin
+    const adminQuery = query(
+      collection(db, "Teams"),
+      where("admin", "==", userId)
+    );
+
+    // Execute both queries concurrently
+    const [memberSnapshot, adminSnapshot] = await Promise.all([
+      getDocs(memberQuery),
+      getDocs(adminQuery),
+    ]);
+
+    // Combine the results from both snapshots
+    const teams = [
+      ...memberSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
+      ...adminSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
+    ];
+
+    // Remove duplicates based on team ID
+    const uniqueTeams = Array.from(
+      new Map(teams.map((team) => [team.id, team])).values()
+    );
+
+    return uniqueTeams; // Return the unique fetched teams
+  } catch (error) {
+    throw new Error("Error fetching teams: " + error.message);
+  }
 };

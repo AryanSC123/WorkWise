@@ -29,12 +29,13 @@ const SignUp = ({ toggleForm }) => {
 
   const containerStyle = {
     width: "40%",
+    height: "40%",
     margin: "auto",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    padding: "20px",
+    padding: "40px",
     borderRadius: "8px",
     boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
     backgroundColor: "#ffffff",

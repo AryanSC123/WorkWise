@@ -56,6 +56,7 @@ export default function HomePageWithLogin() {
           onClick={handleShowJoinOrCreate}
           label="Join or create team"
         />
+        <MuiButton onClick={() => navigate("/messages")} label="Messages" />
       </div>
       <div>
         {showJoinOrCreate ? (

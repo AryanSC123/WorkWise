@@ -8,6 +8,8 @@ import AuthPage from "./pages/AuthPages/AuthPage";
 import { useAuthListener } from "./Firebase/firebaseFunctions"; // Import your custom hook
 import VideoCall from "./Components/VideoCall";
 import TeamDetails from "./pages/TeamDetails";
+import Message from "./pages/ChatPage";
+import ChatPage from "./pages/ChatPage";
 
 function App() {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
@@ -40,6 +42,10 @@ function App() {
         <Route
           path="/teamDetails/:teamId"
           element={isAuthenticated ? <TeamDetails /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/messages"
+          element={isAuthenticated ? <ChatPage /> : <Navigate to="/login" />}
         />
       </Routes>
     </BrowserRouter>

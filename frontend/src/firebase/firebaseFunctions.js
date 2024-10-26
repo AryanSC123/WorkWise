@@ -20,6 +20,7 @@ import {
   query,
   where,
   getDocs,
+  setDoc,
 } from "firebase/firestore";
 
 export const signUpUser = async (email, password, dispatch) => {
@@ -37,6 +38,14 @@ export const signUpUser = async (email, password, dispatch) => {
         uid: userCredential.user.uid, // Store the UID
       })
     );
+
+    // Add user details to the Firestore Users collection using UID as document ID
+    await setDoc(doc(db, "Users", userCredential.user.uid), {
+      uid: userCredential.user.uid,
+      email: userCredential.user.email,
+      createdAt: new Date(),
+      // Add any other user fields you want to store
+    });
 
     return userCredential; // Return user credential on success
   } catch (error) {
@@ -168,4 +177,41 @@ export const loginUser = async (email, password) => {
   } catch (error) {
     throw new Error(error.message); // Throw error to be handled in the component
   }
+};
+
+export const fetchUsers = async () => {
+  try {
+    const usersCollection = collection(db, "Users"); // Adjust collection name if necessary
+    const usersSnapshot = await getDocs(usersCollection);
+
+    // Map through the documents and return an array of user data
+    const usersList = usersSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    return usersList; // Return the array of users
+  } catch (error) {
+    throw new Error("Error fetching users: " + error.message);
+  }
+};
+
+export const fetchUserById = async (userId) => {
+  console.log(userId);
+  // try {
+  //   // Reference the specific user document by userId (uid)
+  //   const userDoc = doc(db, "Users", userId);
+  //   const userSnapshot = await getDoc(userDoc); // Get the user document
+
+  //   if (userSnapshot.exists()) {
+  //     return {
+  //       id: userSnapshot.id,
+  //       ...userSnapshot.data(),
+  //     }; // Return user data if it exists
+  //   } else {
+  //     throw new Error("User not found");
+  //   }
+  // } catch (error) {
+  //   throw new Error("Error fetching user: " + error.message);
+  // }
 };

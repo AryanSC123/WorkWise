@@ -2,6 +2,8 @@
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
 } from "firebase/auth";
 import { auth } from "./firebase";
 import { login, logout } from "../Redux/action/authAction";
@@ -128,5 +130,42 @@ export const fetchUserTeams = async (userId) => {
     return uniqueTeams; // Return the unique fetched teams
   } catch (error) {
     throw new Error("Error fetching teams: " + error.message);
+  }
+};
+
+export const fetchTeamDetails = async (teamId) => {
+  console.log(`Fetching details for team ID: ${teamId}`); // Log team ID
+  const teamDoc = doc(db, "Teams", teamId); // Adjust collection name as necessary
+  const teamData = await getDoc(teamDoc);
+
+  if (!teamData.exists()) {
+    console.log("Team document does not exist"); // Log if document does not exist
+    throw new Error("Team not found");
+  }
+
+  console.log("Fetched team data:", teamData.data()); // Log fetched data
+  return { id: teamData.id, ...teamData.data() }; // Return team data along with its ID
+};
+
+export const logoutUser = async () => {
+  try {
+    await signOut(auth); // Sign out the user
+    console.log("User logged out successfully.");
+  } catch (error) {
+    console.error("Error logging out:", error);
+    throw error; // Rethrow the error to handle it in the calling component if needed
+  }
+};
+
+export const loginUser = async (email, password) => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    return userCredential.user; // Return user data on successful login
+  } catch (error) {
+    throw new Error(error.message); // Throw error to be handled in the component
   }
 };

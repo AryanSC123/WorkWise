@@ -1,5 +1,7 @@
+// src/components/Login.js
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
+import { loginUser } from "../../Firebase/firebaseFunctions"; // Import your login function
 import { MuiInput } from "../../MuiTemplates/MuiInput";
 import MuiButton from "../../MuiTemplates/MuiButton";
 
@@ -7,10 +9,18 @@ const Login = ({ toggleForm }) => {
   const dispatch = useDispatch();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleLogin = () => {
-    console.log("Logging in with:", { username, password });
-    // Implement your login logic here
+  const handleLogin = async () => {
+    try {
+      const user = await loginUser(username, password); // Call the login function
+      console.log("Logged in user:", user);
+      // Optionally dispatch an action to update your Redux store
+      // dispatch(yourAction(user));
+    } catch (error) {
+      console.error("Error logging in:", error);
+      setError(error.message); // Set error message to display
+    }
   };
 
   const containerStyle = {
@@ -34,6 +44,8 @@ const Login = ({ toggleForm }) => {
 
   return (
     <div style={containerStyle}>
+      {error && <p style={{ color: "red" }}>{error}</p>}{" "}
+      {/* Display error message */}
       <MuiInput
         placeholder="Email"
         variant="outlined"

@@ -71,7 +71,7 @@ const SignUp = ({ toggleForm }) => {
       />
       <p>
         <span
-          style={{ cursor: "pointer", color: "#007bff" }}
+          style={{ cursor: "pointer", color: "#323232" }}
           onClick={toggleForm}
         >
           Already a member? Log In

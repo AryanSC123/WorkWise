@@ -29,20 +29,12 @@ export default function JoinOrCreateTeam() {
     }
   };
 
-  // const handleJoinTeam = async () => {
-  //   try {
-  //     await joinTeam(teamCode, userId); // Call joinTeam with teamCode and userId
-  //     console.log(`Successfully joined team with ID: ${teamCode}`);
-  //     setTeamCode(""); // Clear the input field
-  //   } catch (error) {
-  //     setError(error.message); // Set error message for display
-  //     console.error(error.message);
-  //   }
-  // };
-
-  const handleJoinTeam = (teamId) => {
+  const handleJoinTeam = async (teamId) => {
+    await joinTeam(teamCode, userId);
     navigate(`/videoCall/${teamId}`, { state: { userId: userId } });
   };
+
+  console.log(teamCode);
 
   return (
     <div>
@@ -114,14 +106,9 @@ export default function JoinOrCreateTeam() {
               marginBottom: "10px",
             }}
           />
-          {/* <MuiButton
-            label="Join Team"
-            onClick={handleJoinTeam} // Call handleJoinTeam
-          /> */}
-          {/* <MuiButton label="Join Team" onClick={() => handleJoinTeam(teamId)} /> */}
           <MuiButton
             label="Join Team"
-            onClick={() => handleJoinTeam("NvevuoYQPcQXVelpPVqv")}
+            onClick={() => handleJoinTeam({ teamCode })}
           />
         </div>
       </div>

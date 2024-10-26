@@ -31,7 +31,8 @@ export default function JoinOrCreateTeam() {
 
   const handleJoinTeam = async (teamId) => {
     await joinTeam(teamCode, userId);
-    navigate(`/videoCall/${teamId}`, { state: { userId: userId } });
+    navigate(`/teamDetails/${teamCode}`);
+    // navigate(`/videoCall/${teamId}`, { state: { userId: userId } });
   };
 
   console.log(teamCode);

@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { fetchTeamDetails } from "../Firebase/firebaseFunctions"; // Adjust the import as necessary
 import { Card, CardContent, Typography, List, ListItem } from "@mui/material";
+import MuiButton from "../MuiTemplates/MuiButton";
 
 const TeamDetails = () => {
   const { teamId } = useParams(); // Get the team ID from the URL
   const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getTeamDetails = async () => {
@@ -38,6 +40,10 @@ const TeamDetails = () => {
       <Card style={styles.card}>
         <CardContent>
           <h2>{team.name}</h2>
+          <MuiButton
+            onClick={() => navigate(`/videoCall/${teamId}`)}
+            label="Start a video call"
+          />
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
             <h4>Admin:</h4> {team.admin}
           </div>
